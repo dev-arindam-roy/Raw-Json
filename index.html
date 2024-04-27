@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Json Render</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+  <link href="./assets/jquery.json-viewer.css" type="text/css" rel="stylesheet">
+</head>
+<body>
+
+<div class="container mt-3">
+    <div class="row">
+        <div class="col-md-12">
+            <h1>RAW JSON DATA</h1>
+            <hr/>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-header">
+                    DATA SET
+                </div>
+                <div class="card-body">
+                    <select id="dataset" class="form-select">
+                        <option value="coding_languages.json">Coding Languages</option>
+                        <option value="indain_prime_ministers.json">Indain Prime Ministers</option>
+                        <option value="james_bond_movies.json">James Bond Movies</option>
+                        <option value="football_worldcup.json">Football Worldcup</option>
+                        <option value="cricket_worldcup.json">Cricket Worldcup</option>
+                        <option value="adjustments.json">Adjustments</option>
+                        <option value="chicken.json">Chicken</option>
+                        <option value="dressings.json">Dressings</option>
+                        <option value="drinks.json">Drinks</option>
+                        <option value="food_info.json">Food Info</option>
+                        <option value="foods.json">Foods</option>
+                        <option value="healthy.json">Healthy</option>
+                        <option value="kfc_chicken.json">KFC Chicken</option>
+                        <option value="pizzas.json">Pizzas</option>
+                        <option value="restaurants.json">Restaurants</option>
+                        <option value="resturants.json">Resturants</option>
+                        <option value="sauces.json">Sauces</option>
+                        <option value="specials.json">Specials</option>
+                    </select>
+                </div>
+                <div class="card-footer">
+                    <button type="button" id="loadDataSetBtn" class="btn btn-success" style="width: 100%;">Load Json Data</button>
+                    <button type="button" id="downloadBtn" class="btn btn-primary mt-2" style="width: 100%;">Download It</button>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-9">
+            <div class="card">
+                <div class="card-header">
+                    <p class="options">
+                        Options:
+                        <label title="Generate node as collapsed" class="ms-3">
+                          <input type="checkbox" id="collapsed"/> Collapse nodes
+                        </label>
+                        <label title="Allow root element to be collasped" class="ms-3">
+                          <input type="checkbox" id="root-collapsable"/> Root collapsable
+                        </label>
+                        <label title="Surround keys with quotes" class="ms-3">
+                          <input type="checkbox" id="with-quotes"/> Keys with quotes
+                        </label>
+                        <label title="Generate anchor tags for URL values" class="ms-3">
+                          <input type="checkbox" id="with-links"/>
+                          With Links
+                        </label>
+                    </p>
+                </div>
+                <div class="card-body">
+                    <pre id="json-renderer"></pre>
+                    <input type="hidden" id="rawJson" />
+                </div>
+                <div class="card-footer"></div>
+            </div>   
+        </div>
+    </div>
+</div>
+
+
+<script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+<script src="./assets/jquery.json-viewer.js"></script>
+<script>
+$(document).ready(function() {
+    
+    document.getElementById('loadDataSetBtn').addEventListener('click', loadDataSet);
+    document.getElementById('downloadBtn').addEventListener('click', downloadAsJson);
+    let jsonFile = './jsons/coding_languages.json';
+
+    function loadDataSet () {
+        jsonFile = document.getElementById('dataset').value;
+        jsonFile = `./jsons/${jsonFile}`;
+        renderJson();
+    }
+
+    /*Download as .json file*/
+    function downloadAsJson() {
+        const a = document.createElement("a");
+        const content = document.getElementById('rawJson').value;
+        const file = new Blob([content], { type: 'text/plain' });
+        a.href = URL.createObjectURL(file);
+        a.download = document.getElementById('dataset').value;
+        a.click();
+    }
+
+    const renderJson = async () => {
+        await fetch(jsonFile)
+        .then((response) => {
+            return response.json();
+        }).then((data) => {
+            let options = {
+                collapsed: document.getElementById("collapsed").checked,
+                rootCollapsable: document.getElementById("root-collapsable").checked,
+                withQuotes: document.getElementById("with-quotes").checked,
+                withLinks: document.getElementById("with-links").checked
+            };
+            $('#json-renderer').jsonViewer(data, options);
+            document.getElementById('rawJson').value = JSON.stringify(data);
+        }).catch((error) => {
+            console.log(error);
+        });
+    };
+
+    /*Generate on option change*/
+    $('p.options input[type=checkbox]').click(renderJson);
+
+    /*Display JSON sample on page load*/
+    renderJson();
+});
+</script>
+</body>
+</html>
